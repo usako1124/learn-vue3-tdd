@@ -1,6 +1,6 @@
 import SignUpPage from "./SignUpPage.vue";
 import { describe, it, expect, afterEach } from "vitest";
-import { render, cleanup, fireEvent } from "@testing-library/vue";
+import { render, cleanup, fireEvent, screen } from "@testing-library/vue";
 
 describe("SignUpPage", () => {
   afterEach(cleanup);
@@ -70,21 +70,44 @@ describe("SignUpPage", () => {
 
   describe("インタラクション", () => {
     it("全フォーム入力済み、かつパスワードとパスワードの値が同じ値の場合、登録の disabled が解除される", async () => {
-      const wrapper = render(SignUpPage);
-      const usernameInput = wrapper.getByLabelText("ユーザー名");
-      const emailInput = wrapper.queryByLabelText("メールアドレス");
-      const passwordInput = wrapper.queryByLabelText("パスワード");
-      const passwordCheckInput =
-        wrapper.queryByLabelText("パスワード（確認用）");
-      await fireEvent.update(usernameInput, "usako");
-      await fireEvent.update(emailInput, "usako@example.com");
-      await fireEvent.update(passwordInput, "hogehogehoge");
-      await fireEvent.update(passwordCheckInput, "hogehogehoge");
-      const actual = wrapper.getByRole("button", { name: "登録" }).disabled;
+      render(SignUpPage);
+      await fillAllForm(
+        "usako",
+        "usako@example.com",
+        "hogehogehoge",
+        "hogehogehoge"
+      );
 
+      const actual = screen.getByRole("button", { name: "登録" }).disabled;
       const expected = false;
 
       expect(actual).toBe(expected);
     });
+    it("全フォーム入力済みでも、パスワードが不一致の場合、登録ボタンが disabled になる", async () => {
+      render(SignUpPage);
+      await fillAllForm(
+        "usako",
+        "usako@example.com",
+        "hogehogehoge",
+        "hugahuga"
+      );
+
+      const actual = screen.getByRole("button", { name: "登録" }).disabled;
+      const expected = true;
+
+      expect(actual).toBe(expected);
+    });
+
+    async function fillAllForm(username, email, password, passwordCheck) {
+      const usernameInput = screen.getByLabelText("ユーザー名");
+      const emailInput = screen.queryByLabelText("メールアドレス");
+      const passwordInput = screen.queryByLabelText("パスワード");
+      const passwordCheckInput =
+        screen.queryByLabelText("パスワード（確認用）");
+      await fireEvent.update(usernameInput, username);
+      await fireEvent.update(emailInput, email);
+      await fireEvent.update(passwordInput, password);
+      await fireEvent.update(passwordCheckInput, passwordCheck);
+    }
   });
 });
