@@ -1,6 +1,7 @@
 import SignUpPage from "./SignUpPage.vue";
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { render, cleanup, fireEvent, screen } from "@testing-library/vue";
+import axios from "axios";
 
 describe("SignUpPage", () => {
   afterEach(cleanup);
@@ -96,6 +97,34 @@ describe("SignUpPage", () => {
       const expected = true;
 
       expect(actual).toBe(expected);
+    });
+    it("登録ボタンを押下した場合、ユーザー名、メールアドレス、パスワードをサーバーに送信", async () => {
+      render(SignUpPage);
+      await fillAllForm(
+        "usako",
+        "usako@example.com",
+        "hogehogehoge",
+        "hogehogehoge"
+      );
+      const button = screen.getByRole("button", { name: "登録" });
+      const mockFn = vi.fn;
+
+      axios.post = mockFn;
+      await fireEvent.click(button);
+
+      console.log("aaaaaa");
+      console.log(vi);
+
+      const firstCall = mockFn.mock.calls.at(0);
+      const actual = firstCall.at(1);
+
+      const expected = {
+        username: "usako",
+        email: "usako@example.com",
+        password: "hogehogehoge",
+      };
+
+      expect(actual).toEqual(expected);
     });
 
     async function fillAllForm(username, email, password, passwordCheck) {

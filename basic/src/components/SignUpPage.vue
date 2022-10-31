@@ -1,4 +1,5 @@
 <script setup>
+import axios from "axios";
 import { computed, reactive, ref } from "vue";
 
 const data = reactive({
@@ -18,6 +19,14 @@ const isDisabled = computed(() => {
     return false;
   return true;
 });
+
+const submit = () => {
+  axios.post("/api/v1/users", {
+    username: data.username,
+    email: data.email,
+    password: data.password,
+  });
+};
 </script>
 
 <template>
@@ -30,5 +39,5 @@ const isDisabled = computed(() => {
   <input type="password" id="password" v-model="data.password" />
   <label for="passwordCheck">パスワード（確認用）</label>
   <input type="password" id="passwordCheck" v-model="data.passwordCheck" />
-  <button v-bind:disabled="isDisabled">登録</button>
+  <button v-bind:disabled="isDisabled" v-on:click="submit">登録</button>
 </template>
