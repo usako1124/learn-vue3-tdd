@@ -107,13 +107,12 @@ describe("SignUpPage", () => {
         "hogehogehoge"
       );
       const button = screen.getByRole("button", { name: "登録" });
-      const mockFn = vi.fn;
+      const mockFn = vi.fn();
 
       axios.post = mockFn;
       await fireEvent.click(button);
 
-      console.log("aaaaaa");
-      console.log(vi);
+      // console.log(mockFn.mock.calls);
 
       const firstCall = mockFn.mock.calls.at(0);
       const actual = firstCall.at(1);
