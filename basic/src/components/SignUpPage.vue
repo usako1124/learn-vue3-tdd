@@ -21,6 +21,7 @@ const isDisabled = computed(() => {
 });
 
 const submit = () => {
+  console.log("submitだよ");
   axios.post("/api/v1/users", {
     username: data.username,
     email: data.email,
