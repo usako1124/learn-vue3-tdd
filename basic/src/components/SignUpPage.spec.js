@@ -1,8 +1,8 @@
 import SignUpPage from "./SignUpPage.vue";
-import { describe, it, expect, afterEach, vi, assert } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { render, cleanup, fireEvent, screen } from "@testing-library/vue";
 import axios from "axios";
-import { context, rest } from "msw";
+import { rest } from "msw";
 import { setupServer } from "msw/node";
 
 describe("SignUpPage", () => {
@@ -100,41 +100,39 @@ describe("SignUpPage", () => {
 
       expect(actual).toBe(expected);
     });
-    it("登録ボタンを押下した場合、ユーザー名、メールアドレス、パスワードをサーバーに送信", async () => {
-      render(SignUpPage);
-      await fillAllForm(
-        "usako",
-        "usako@example.com",
-        "hogehogehoge",
-        "hogehogehoge"
-      );
-      const button = screen.getByRole("button", { name: "登録" });
-      const mockFn = vi.fn();
 
-      axios.post = mockFn;
-      await fireEvent.click(button);
+    // it("登録ボタンを押下した場合、ユーザー名、メールアドレス、パスワードをサーバーに送信（axios）", async () => {
+    //   render(SignUpPage);
+    //   await fillAllForm(
+    //     "usako",
+    //     "usako@example.com",
+    //     "hogehogehoge",
+    //     "hogehogehoge"
+    //   );
+    //   const button = screen.getByRole("button", { name: "登録" });
+    //   const mockFn = vi.fn();
 
-      // console.log(mockFn.mock.calls);
+    //   axios.post = mockFn;
+    //   await fireEvent.click(button);
 
-      const firstCall = mockFn.mock.calls.at(0);
-      const actual = firstCall.at(1);
+    //   const firstCall = mockFn.mock.calls.at(0);
+    //   const actual = firstCall.at(1);
 
-      const expected = {
-        username: "usako",
-        email: "usako@example.com",
-        password: "hogehogehoge",
-      };
+    //   const expected = {
+    //     username: "usako",
+    //     email: "usako@example.com",
+    //     password: "hogehogehoge",
+    //   };
 
-      expect(actual).toEqual(expected);
-    });
+    //   expect(actual).toEqual(expected);
+    // });
 
     it("登録ボタンを押下した場合、ユーザー名、メールアドレス、パスワードをサーバーに送信（MSW）", async () => {
       let requestBody;
 
       const server = setupServer(
-        rest.post("/api/v1/users", (req, res, ctx) => {
-          console.log("postされたよ");
-          // requestBody = await req.json();
+        rest.post("/api/v1/users", async (req, res, ctx) => {
+          requestBody = await req.json();
           return res(ctx.status(200));
         })
       );
@@ -162,41 +160,6 @@ describe("SignUpPage", () => {
 
       expect(actual).toEqual(expected);
     });
-
-    // it("登録時にサーバーからエラーが返された場合、エラーメッセージを表示", async () => {
-    //   let requestBody;
-
-    //   const server = setupServer(
-    //     rest.post("/api/v1/users", (req, res, ctx) => {
-    //       console.log("postされたよ");
-    //       // requestBody = await req.json();
-    //       return res(ctx.status(200));
-    //     })
-    //   );
-    //   server.listen();
-
-    //   render(SignUpPage);
-    //   await fillAllForm(
-    //     "usako",
-    //     "usako@example.com",
-    //     "hogehogehoge",
-    //     "hogehogehoge"
-    //   );
-
-    //   const button = screen.getByRole("button", { name: "登録" });
-    //   await fireEvent.click(button);
-    //   console.log("クリックされたよ");
-    //   await server.close();
-
-    //   const actual = requestBody;
-    //   const expected = {
-    //     username: "usako",
-    //     email: "usako@example.com",
-    //     password: "hogehogehoge",
-    //   };
-
-    //   expect(actual).toEqual(expected);
-    // });
 
     async function fillAllForm(username, email, password, passwordCheck) {
       const usernameInput = screen.getByLabelText("ユーザー名");
