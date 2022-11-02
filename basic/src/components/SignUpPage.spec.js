@@ -147,32 +147,33 @@ describe("SignUpPage", () => {
       expect(actual).toBe(expected);
     });
 
-    // MEMO: axios と MSW を併用するとエラーになる https://github.com/mswjs/msw/issues/1125
-    // it("登録ボタンを押下した場合、ユーザー名、メールアドレス、パスワードをサーバーに送信（axios）", async () => {
-    //   render(SignUpPage);
-    //   await fillAllForm(
-    //     "usako",
-    //     "usako@example.com",
-    //     "hogehogehoge",
-    //     "hogehogehoge"
-    //   );
-    //   const button = screen.getByRole("button", { name: "登録" });
-    //   const mockFn = vi.fn();
+    it("登録ボタンを押下した場合、ユーザー名、メールアドレス、パスワードをサーバーに送信（axios）", async () => {
+      await fillAllForm(
+        "usako",
+        "usako@example.com",
+        "hogehogehoge",
+        "hogehogehoge"
+      );
+      const button = screen.getByRole("button", { name: "登録" });
+      const mockFn = vi.fn();
+      const axiosFn = axios.post;
 
-    //   axios.post = mockFn;
-    //   await fireEvent.click(button);
+      axios.post = mockFn;
+      await fireEvent.click(button);
+      // MEMO: 初期化してあげないと移行の SMW でエラーになる
+      axios.post = axiosFn;
 
-    //   const firstCall = mockFn.mock.calls.at(0);
-    //   const actual = firstCall.at(1);
+      const firstCall = mockFn.mock.calls.at(0);
+      const actual = firstCall.at(1);
 
-    //   const expected = {
-    //     username: "usako",
-    //     email: "usako@example.com",
-    //     password: "hogehogehoge",
-    //   };
+      const expected = {
+        username: "usako",
+        email: "usako@example.com",
+        password: "hogehogehoge",
+      };
 
-    //   expect(actual).toEqual(expected);
-    // });
+      expect(actual).toEqual(expected);
+    });
 
     it("登録ボタンを押下した場合、ユーザー名、メールアドレス、パスワードをサーバーに送信（MSW）", async () => {
       await responseServerCheck("usako");
