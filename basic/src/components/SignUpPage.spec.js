@@ -161,6 +161,40 @@ describe("SignUpPage", () => {
       expect(actual).toEqual(expected);
     });
 
+    it("登録時にサーバーからエラーが返された場合、エラーメッセージを表示", async () => {
+      const server = setupServer(
+        rest.post("/api/v1/users", async (req, res, ctx) => {
+          return res(
+            ctx.status(500),
+            ctx.json({
+              error: {
+                message: "サーバーエラーです。時間を置いて試してください。",
+              },
+            })
+          );
+        })
+      );
+      server.listen();
+
+      render(SignUpPage);
+      await fillAllForm(
+        "usako",
+        "usako@example.com",
+        "hogehogehoge",
+        "hogehogehoge"
+      );
+
+      const button = screen.getByRole("button", { name: "登録" });
+      await fireEvent.click(button);
+      await server.close();
+
+      const actual = await screen.findByText(
+        "サーバーエラーです。時間を置いて試してください。"
+      );
+
+      expect(actual).toBeTruthy();
+    });
+
     async function fillAllForm(username, email, password, passwordCheck) {
       const usernameInput = screen.getByLabelText("ユーザー名");
       const emailInput = screen.queryByLabelText("メールアドレス");
